@@ -1,0 +1,7 @@
+# Where Ansible will find your kubeconfig (after you deploy AKS and run 'az aks get-credentials')
+kubeconfig: "{{ lookup('env','HOME') }}/.kube/config"
+
+# Ingress settings
+ingress_namespace: ingress-nginx
+ingress_release_name: ingress-nginx
+ingress_chart_version: ""  # keep empty to install the latest chart

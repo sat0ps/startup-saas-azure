@@ -1,0 +1,55 @@
+---
+# Adds the Helm repo and installs/updates ingress-nginx with a public LoadBalancer.
+
+- name: Add Helm repo: ingress-nginx
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: https://kubernetes.github.io/ingress-nginx
+
+- name: Install/upgrade NGINX Ingress Controller
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig }}"
+    name: "{{ ingress_release_name }}"
+    chart_ref: ingress-nginx/ingress-nginx
+    chart_version: "{{ (ingress_chart_version | length > 0) | ternary(ingress_chart_version, omit) }}"
+    release_namespace: "{{ ingress_namespace }}"
+    create_namespace: true
+    wait: true
+    values:
+      controller:
+        replicaCount: 1
+        service:
+          type: LoadBalancer  # Public LB on Azure
+        metrics:
+          enabled: false
+
+# (Nice) Wait for the LoadBalancer external IP to be assigned
+- name: Get ingress Service
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig }}"
+    api_version: v1
+    kind: Service
+    name: "{{ ingress_release_name }}-controller"
+    namespace: "{{ ingress_namespace }}"
+  register: svc_info
+  retries: 30
+  delay: 10
+  until: >
+    (svc_info.resources | length > 0)
+    and (
+      (svc_info.resources.0.status.loadBalancer.ingress is defined)
+      and (svc_info.resources.0.status.loadBalancer.ingress | length > 0)
+      and (
+        (svc_info.resources.0.status.loadBalancer.ingress.0.ip is defined)
+        or (svc_info.resources.0.status.loadBalancer.ingress.0.hostname is defined)
+      )
+    )
+
+- name: Show external address
+  ansible.builtin.debug:
+    msg: >-
+      Ingress LB address:
+      {{
+        (svc_info.resources.0.status.loadBalancer.ingress.0.ip
+         | default(svc_info.resources.0.status.loadBalancer.ingress.0.hostname))
+      }}
