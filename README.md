@@ -27,28 +27,110 @@ A complete self-hosted SaaS productivity suite deployed on Azure Kubernetes Serv
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│                 Azure DNS Zone                  │
-│  *.yourdomain.com → Azure Load Balancer        │
-└─────────────────────────────────────────────────┘
-                        │
-┌─────────────────────────────────────────────────┐
-│              Azure Load Balancer                │
-│         SSL Termination & Routing               │
-└─────────────────────────────────────────────────┘
-                        │
-┌─────────────────────────────────────────────────┐
-│            Azure Kubernetes Service             │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────┐ │
-│  │   Moodle    │  │  Nextcloud  │  │ SuiteCRM │ │
-│  │moodle.domain│  │files.domain │  │crm.domain│ │
-│  └─────────────┘  └─────────────┘  └──────────┘ │
-│  ┌─────────────┐  ┌─────────────┐               │
-│  │ OrangeHRM   │  │ Roundcube   │               │
-│  │ hr.domain   │  │mail.domain  │               │
-│  └─────────────┘  └─────────────┘               │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Azure Cloud Infrastructure"
+        subgraph "DNS & Traffic Management"
+            DNS[Azure DNS Zone<br/>*.yourdomain.com]
+            AGW[Application Gateway<br/>SSL Termination & Routing]
+            LB[Azure Load Balancer<br/>Layer 4 Load Balancing]
+        end
+        
+        subgraph "Network Security"
+            VNet[Virtual Network<br/>10.0.0.0/16]
+            NSG[Network Security Groups<br/>Traffic Control]
+            Firewall[Azure Firewall<br/>Network Protection]
+        end
+        
+        subgraph "Kubernetes Cluster"
+            AKS[Azure Kubernetes Service<br/>Container Orchestration]
+            SystemNodes[System Node Pool<br/>Standard_D2s_v3]
+            UserNodes[User Node Pool<br/>Standard_D4s_v3]
+        end
+        
+        subgraph "Business Applications"
+            Moodle[📚 Moodle LMS<br/>moodle.domain.com]
+            Nextcloud[☁️ Nextcloud<br/>files.domain.com]
+            SuiteCRM[🤝 SuiteCRM<br/>crm.domain.com]
+            OrangeHRM[👥 OrangeHRM<br/>hr.domain.com]
+            Roundcube[📧 Roundcube<br/>mail.domain.com]
+        end
+        
+        subgraph "Data & Storage"
+            ACR[Azure Container Registry<br/>Docker Images]
+            Storage[Azure Storage Account<br/>Persistent Volumes]
+            Database[Azure Database<br/>PostgreSQL/MySQL]
+            KeyVault[Azure Key Vault<br/>Secrets & Certificates]
+        end
+        
+        subgraph "Monitoring & Management"
+            Monitor[Azure Monitor<br/>Metrics & Alerts]
+            Insights[Application Insights<br/>APM & Diagnostics]
+            LogAnalytics[Log Analytics<br/>Centralized Logging]
+        end
+        
+        subgraph "DevOps & Automation"
+            DevOps[Azure DevOps<br/>CI/CD Pipelines]
+            Ansible[Ansible<br/>Configuration Management]
+            Helm[Helm Charts<br/>Application Deployment]
+        end
+    end
+    
+    subgraph "External Access"
+        Users[👥 End Users]
+        Admins[👨‍💼 Administrators]
+        Developers[👨‍💻 Developers]
+    end
+    
+    %% User Traffic Flow
+    Users --> DNS
+    DNS --> AGW
+    AGW --> LB
+    LB --> AKS
+    
+    %% Application Routing
+    AKS --> Moodle
+    AKS --> Nextcloud
+    AKS --> SuiteCRM
+    AKS --> OrangeHRM
+    AKS --> Roundcube
+    
+    %% Infrastructure Dependencies
+    AKS --> ACR
+    AKS --> Storage
+    AKS --> Database
+    AKS --> KeyVault
+    
+    %% Monitoring Flow
+    AKS --> Monitor
+    AKS --> Insights
+    AKS --> LogAnalytics
+    
+    %% DevOps Flow
+    Developers --> DevOps
+    DevOps --> ACR
+    DevOps --> AKS
+    Admins --> Ansible
+    Ansible --> AKS
+    Helm --> AKS
+    
+    %% Network Security
+    VNet --> AKS
+    NSG --> AKS
+    Firewall --> VNet
+
+    %% Styling
+    classDef azure fill:#0078d4,stroke:#fff,stroke-width:2px,color:#fff
+    classDef apps fill:#28a745,stroke:#fff,stroke-width:2px,color:#fff
+    classDef storage fill:#fd7e14,stroke:#fff,stroke-width:2px,color:#fff
+    classDef monitoring fill:#6f42c1,stroke:#fff,stroke-width:2px,color:#fff
+    classDef users fill:#dc3545,stroke:#fff,stroke-width:2px,color:#fff
+    
+    class DNS,AGW,LB,VNet,NSG,Firewall,AKS azure
+    class Moodle,Nextcloud,SuiteCRM,OrangeHRM,Roundcube apps
+    class ACR,Storage,Database,KeyVault storage
+    class Monitor,Insights,LogAnalytics monitoring
+    class Users,Admins,Developers users
 ```
 
 ## 🛠️ Technology Stack
