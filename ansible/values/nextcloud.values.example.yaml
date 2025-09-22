@@ -1,0 +1,24 @@
+nextcloud:
+  host: files.example.com
+  extraVolumes: []
+  extraVolumeMounts: []
+ingress:
+  enabled: true
+  className: nginx
+  tls:
+    - hosts: [files.example.com]
+      secretName: nextcloud-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    external-dns.alpha.kubernetes.io/target: REPLACE_WITH_INGRESS_IP_OR_DNS
+mariadb:
+  enabled: false
+externalDatabase:
+  enabled: true
+  type: mysql
+  host: your-mysql-host.mysql.database.azure.com
+  database: nextcloud
+  user: ncuser
+  password: CHANGEME
+redis:
+  enabled: true

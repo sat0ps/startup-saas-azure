@@ -1,0 +1,53 @@
+---
+# Portfolio-only tasks showing how you'd install app charts via Helm.
+
+- name: Add Helm repos for apps
+  kubernetes.core.helm_repository:
+    name: "{{ item.name }}"
+    repo_url: "{{ item.url }}"
+  loop:
+    - { name: bitnami,   url: "https://charts.bitnami.com/bitnami" }
+    - { name: nextcloud, url: "https://nextcloud.github.io/helm/" }
+    - { name: roundcube, url: "https://roundcube.github.io/helm" }
+
+# Moodle
+- name: (portfolio) Moodle install
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig }}"
+    name: moodle
+    chart_ref: bitnami/moodle
+    release_namespace: platform
+    create_namespace: true
+    wait: false
+    values: "{{ lookup('file', playbook_dir + '/../values/moodle.values.example.yaml') | from_yaml }}"
+
+# Nextcloud
+- name: (portfolio) Nextcloud install
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig }}"
+    name: nextcloud
+    chart_ref: nextcloud/nextcloud
+    release_namespace: platform
+    create_namespace: true
+    wait: false
+    values: "{{ lookup('file', playbook_dir + '/../values/nextcloud.values.example.yaml') | from_yaml }}"
+
+# Roundcube (points to hosted IMAP/SMTP)
+- name: (portfolio) Roundcube install
+  kubernetes.core.helm:
+    kubeconfig: "{{ kubeconfig }}"
+    name: roundcube
+    chart_ref: roundcube/roundcube
+    release_namespace: platform
+    create_namespace: true
+    wait: false
+    values: "{{ lookup('file', playbook_dir + '/../values/roundcube.values.example.yaml') | from_yaml }}"
+
+# SuiteCRM & OrangeHRM — show placeholders (community/custom chart)
+- name: (portfolio) SuiteCRM placeholder
+  ansible.builtin.debug:
+    msg: "Install SuiteCRM via maintained chart or your custom chart; values at ansible/values/suitecrm.values.example.yaml"
+
+- name: (portfolio) OrangeHRM placeholder
+  ansible.builtin.debug:
+    msg: "Install OrangeHRM via maintained chart or your custom chart; values at ansible/values/orangehrm.values.example.yaml"

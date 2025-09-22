@@ -1,0 +1,12 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts: [hrms.example.com]
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    external-dns.alpha.kubernetes.io/target: REPLACE_WITH_INGRESS_IP_OR_DNS
+database:
+  host: your-mysql-host.mysql.database.azure.com
+  user: orange
+  password: CHANGEME
+  name: orangehrm
