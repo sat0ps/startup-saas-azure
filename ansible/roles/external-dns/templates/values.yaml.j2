@@ -1,0 +1,17 @@
+provider: azure
+domainFilters: ["{{ external_dns.domain_filter }}"]
+policy: sync
+registry: txt
+txtOwnerId: external-dns
+interval: 1m
+
+extraArgs:
+  - --txt-prefix=external-dns-
+
+azure:
+  resourceGroup: "{{ external_dns.resource_group }}"
+  tenantId: "{{ external_dns.tenant_id }}"
+  subscriptionId: "{{ external_dns.subscription_id }}"
+  useManagedIdentityExtension: false
+  aadClientId: "{{ external_dns.client_id }}"
+  aadClientSecret: "{{ external_dns.client_secret }}"

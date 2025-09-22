@@ -10,3 +10,14 @@ ingress_chart_version: ""  # keep empty to install the latest chart
 cluster_issuer_name: letsencrypt
 acme_email: "satyampriyam32@gmail.com"
 acme_server: "https://acme-v02.api.letsencrypt.org/directory"  # prod; use staging for tests
+
+
+
+# external-dns (Azure DNS) placeholders for portfolio
+external_dns:
+  domain_filter: "example.com"   # your zone
+  resource_group: "rg-dns"       # RG that contains the DNS zone
+  tenant_id: "00000000-0000-0000-0000-000000000000"
+  subscription_id: "00000000-0000-0000-0000-000000000000"
+  client_id: "00000000-0000-0000-0000-000000000000"
+  client_secret: "USE_KEYVAULT_OR_SECRETS"  # do not commit real secrets
